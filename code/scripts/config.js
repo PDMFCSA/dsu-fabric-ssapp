@@ -12,6 +12,7 @@ const openDSU = require("opendsu");
 const {define} = WebCardinal.components;
 const {setConfig, getConfig, addHook, addControllers, navigateToPageTag} = WebCardinal.preload;
 const {FwController} = await import("./controllers/FwController.js");
+const {getInstance} = await import("./services/UIProgressService.js");
 
 async function watchAndHandleExecution(fnc) {
   try {
@@ -112,7 +113,15 @@ function finishInit() {
     // load fabric base Controller
     addControllers({FwController});
     await setupGlobalErrorHandlers();
-  })
+
+  });
+
+  addHook(constants.HOOKS.AFTER_APP_LOADS, async () => {
+    if(!$$.uiProgressService){
+      $$.uiProgressService = getInstance();
+    }
+  });
+
 
   addHook(constants.HOOKS.BEFORE_PAGE_LOADS, "home", async () => {
     const gtinResolver = require("gtin-resolver");
@@ -142,7 +151,8 @@ function finishInit() {
         userId: config.identity.name,
         action: "Access wallet",
         userDID: did,
-        userGroup: window.currentGroup
+        userGroup: window.currentGroup,
+        actionDate: new Date().toISOString()
       }
 
       let logService = new LogService(constants.LOGIN_LOGS_TABLE);

@@ -122,6 +122,41 @@ class FwController extends WebcController {
     }
   }
 
+  navigateToPageTag(tag, state) {
+    let trigger = ()=>{
+      this.element.dispatchEvent(
+        new CustomEvent('webcardinal:tags:get', {
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+          detail: {
+            tag,
+            callback: (error, path) => {
+              if (error) {
+                console.error(error);
+                return;
+              }
+              if (typeof path === 'object') {
+                console.warn(`Tag "${tag}" can not be found in all the available routes`, path)
+                return;
+              }
+
+              this.navigateToUrl(path, state);
+            },
+          },
+        }),
+      );
+    }
+
+    if($$.uiProgressService && $$.uiProgressService.popupActive()){
+      return setTimeout(()=>{
+        this.navigateToPageTag(tag, state);
+      }, 1000);
+    }
+
+    trigger();
+  }
+
 }
 
 export {FwController};

@@ -146,6 +146,14 @@ export default class EpiComponentController extends FwController {
 
       let leafletHtmlImages = htmlXMLContent.querySelectorAll("img");
       let htmlImageNames = Array.from(leafletHtmlImages).map(img => img.getAttribute("src"));
+      //removing from validation image src that are data URLs ("data:....")
+      htmlImageNames = htmlImageNames.filter((imageSrc)=>{
+        let dataUrlRegex = new RegExp(/^\s*data:([a-z]+\/[a-z]+(;[a-z\-]+\=[a-z\-]+)?)?(;base64)?,[a-z0-9\!\$\&\'\,\(\)\*\+\,\;\=\-\.\_\~\:\@\/\?\%\s]*\s*$/i);
+        if(!!imageSrc.match(dataUrlRegex) || imageSrc.startsWith("data:")){
+          return false;
+        }
+        return true;
+      });
       let uploadedImageNames = Object.keys(leafletImages);
       let differentCaseImgFiles = [];
       let missingImgFiles = []
